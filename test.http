@@ -1,0 +1,479 @@
+### FieldFlow API — HTTP Test File
+### Use with VS Code REST Client extension
+### Install: ext install humao.rest-client
+
+@baseUrl = http://127.0.0.1:8000/api
+@contentType = application/json
+
+# ─────────────────────────────────────────────
+# Store tokens after login (copy from response)
+# ─────────────────────────────────────────────
+@accessToken = PASTE_ACCESS_TOKEN_HERE
+@refreshToken = PASTE_REFRESH_TOKEN_HERE
+
+
+###############################################
+# PHASE 1 — AUTH & USER ENDPOINTS
+###############################################
+
+
+### 1.1 Login as Admin
+# @name loginAdmin
+POST {{baseUrl}}/auth/login/
+Content-Type: {{contentType}}
+
+{
+  "email": "admin@fieldflow.com",
+  "password": "Admin@123"
+}
+
+
+### 1.2 Login as Regional Manager
+POST {{baseUrl}}/auth/login/
+Content-Type: {{contentType}}
+
+{
+  "email": "rm.north@fieldflow.com",
+  "password": "Pass@123"
+}
+
+
+### 1.3 Login as Team Lead
+POST {{baseUrl}}/auth/login/
+Content-Type: {{contentType}}
+
+{
+  "email": "tl.alpha@fieldflow.com",
+  "password": "Pass@123"
+}
+
+
+### 1.4 Login as Field Agent
+POST {{baseUrl}}/auth/login/
+Content-Type: {{contentType}}
+
+{
+  "email": "agent1@fieldflow.com",
+  "password": "Pass@123"
+}
+
+
+### 1.5 Login as Auditor
+POST {{baseUrl}}/auth/login/
+Content-Type: {{contentType}}
+
+{
+  "email": "auditor@fieldflow.com",
+  "password": "Pass@123"
+}
+
+
+### 1.6 Login with wrong password → expect 401
+POST {{baseUrl}}/auth/login/
+Content-Type: {{contentType}}
+
+{
+  "email": "admin@fieldflow.com",
+  "password": "wrongpassword"
+}
+
+
+### 1.7 Refresh access token
+POST {{baseUrl}}/auth/token/refresh/
+Content-Type: {{contentType}}
+
+{
+  "refresh": "{{refreshToken}}"
+}
+
+
+### 1.8 Get current user profile (Me)
+GET {{baseUrl}}/auth/me/
+Authorization: Bearer {{accessToken}}
+
+
+### 1.9 Logout (blacklist refresh token)
+POST {{baseUrl}}/auth/logout/
+Content-Type: {{contentType}}
+Authorization: Bearer {{accessToken}}
+
+{
+  "refresh": "{{refreshToken}}"
+}
+
+
+### 1.10 Access protected endpoint without token → expect 401
+GET {{baseUrl}}/auth/me/
+
+
+### 1.11 List all users (Admin only)
+GET {{baseUrl}}/users/
+Authorization: Bearer {{accessToken}}
+
+
+### 1.12 Get single user detail
+# Replace <user-id> with an actual UUID from seed output
+GET {{baseUrl}}/users/<user-id>/
+Authorization: Bearer {{accessToken}}
+
+
+### 1.13 Create new user (Admin only)
+POST {{baseUrl}}/users/
+Content-Type: {{contentType}}
+Authorization: Bearer {{accessToken}}
+
+{
+  "username": "newagent",
+  "email": "newagent@fieldflow.com",
+  "password": "Pass@123",
+  "first_name": "New",
+  "last_name": "Agent",
+  "role_id": 4,
+  "region_id": null,
+  "team_id": null
+}
+
+
+### 1.14 Update user (Admin only)
+PATCH {{baseUrl}}/users/<user-id>/
+Content-Type: {{contentType}}
+Authorization: Bearer {{accessToken}}
+
+{
+  "first_name": "Updated",
+  "last_name": "Name"
+}
+
+
+### 1.15 Deactivate user (soft delete, Admin only)
+DELETE {{baseUrl}}/users/<user-id>/
+Authorization: Bearer {{accessToken}}
+
+
+###############################################
+# PHASE 2 — TASK ENDPOINTS
+###############################################
+
+
+### 2.1 List all tasks (scope-filtered by role)
+GET {{baseUrl}}/tasks/
+Authorization: Bearer {{accessToken}}
+
+
+### 2.2 List tasks with filters
+GET {{baseUrl}}/tasks/?status=pending&priority=high
+Authorization: Bearer {{accessToken}}
+
+
+### 2.3 List tasks — search by title
+GET {{baseUrl}}/tasks/?search=inspection
+Authorization: Bearer {{accessToken}}
+
+
+### 2.4 List overdue tasks
+GET {{baseUrl}}/tasks/?overdue=true
+Authorization: Bearer {{accessToken}}
+
+
+### 2.5 List tasks ordered by due date
+GET {{baseUrl}}/tasks/?ordering=due_date
+Authorization: Bearer {{accessToken}}
+
+
+### 2.6 Create task (Admin / RM / TL only)
+# @name createTask
+POST {{baseUrl}}/tasks/
+Content-Type: {{contentType}}
+Authorization: Bearer {{accessToken}}
+
+{
+  "title": "Site Inspection at Sector 12",
+  "description": "Inspect the electrical units at Sector 12 facility.",
+  "priority": "high",
+  "due_date": "2026-06-15"
+}
+
+
+### 2.7 Create task with region + team + assigned agent
+# Replace region_id, team_id, assigned_to_id with UUIDs from seed
+POST {{baseUrl}}/tasks/
+Content-Type: {{contentType}}
+Authorization: Bearer {{accessToken}}
+
+{
+  "title": "Customer Follow-up Visit",
+  "description": "Visit the customer site and verify previous work.",
+  "priority": "medium",
+  "due_date": "2026-06-20",
+  "assigned_to_id": "PASTE_FIELD_AGENT_UUID_HERE"
+}
+
+
+### 2.8 Get task detail
+# Replace <task-id> with UUID from createTask response
+GET {{baseUrl}}/tasks/<task-id>/
+Authorization: Bearer {{accessToken}}
+
+
+### 2.9 Assign task to a field agent
+POST {{baseUrl}}/tasks/<task-id>/assign/
+Content-Type: {{contentType}}
+Authorization: Bearer {{accessToken}}
+
+{
+  "assigned_to_id": "PASTE_FIELD_AGENT_UUID_HERE"
+}
+
+
+### 2.10 Update task status → in_progress
+PATCH {{baseUrl}}/tasks/<task-id>/status/
+Content-Type: {{contentType}}
+Authorization: Bearer {{accessToken}}
+
+{
+  "status": "in_progress"
+}
+
+
+### 2.11 Update task status → completed
+PATCH {{baseUrl}}/tasks/<task-id>/status/
+Content-Type: {{contentType}}
+Authorization: Bearer {{accessToken}}
+
+{
+  "status": "completed"
+}
+
+
+### 2.12 Invalid status transition → expect 400
+PATCH {{baseUrl}}/tasks/<task-id>/status/
+Content-Type: {{contentType}}
+Authorization: Bearer {{accessToken}}
+
+{
+  "status": "pending"
+}
+
+
+### 2.13 Partially update a task (title/description)
+PATCH {{baseUrl}}/tasks/<task-id>/
+Content-Type: {{contentType}}
+Authorization: Bearer {{accessToken}}
+
+{
+  "description": "Updated task description with new requirements."
+}
+
+
+### 2.14 Assign task to non-Field Agent → expect 400
+POST {{baseUrl}}/tasks/<task-id>/assign/
+Content-Type: {{contentType}}
+Authorization: Bearer {{accessToken}}
+
+{
+  "assigned_to_id": "PASTE_TEAM_LEAD_UUID_HERE"
+}
+
+
+### 2.15 List tasks as Field Agent → should only see own tasks
+# Login as agent1 first, copy that access token here
+GET {{baseUrl}}/tasks/
+Authorization: Bearer AGENT_ACCESS_TOKEN_HERE
+
+
+### 2.16 Delete task — cancel it (Admin only)
+DELETE {{baseUrl}}/tasks/<task-id>/
+Authorization: Bearer {{accessToken}}
+
+
+### 2.17 Create task with past due_date → expect 400
+POST {{baseUrl}}/tasks/
+Content-Type: {{contentType}}
+Authorization: Bearer {{accessToken}}
+
+{
+  "title": "Old Task",
+  "priority": "low",
+  "due_date": "2020-01-01"
+}
+
+
+### 2.18 List tasks paginated (page 2)
+GET {{baseUrl}}/tasks/?page=2
+Authorization: Bearer {{accessToken}}
+
+
+###############################################
+# PHASE 3 — VISIT ENDPOINTS
+###############################################
+
+
+### 3.1 List all visits (scope-filtered by role)
+GET {{baseUrl}}/visits/
+Authorization: Bearer {{accessToken}}
+
+
+### 3.2 List visits with filters
+GET {{baseUrl}}/visits/?status=scheduled
+Authorization: Bearer {{accessToken}}
+
+
+### 3.3 Filter visits by outcome
+GET {{baseUrl}}/visits/?outcome=successful
+Authorization: Bearer {{accessToken}}
+
+
+### 3.4 Filter high-risk visits (by AI flag)
+GET {{baseUrl}}/visits/?risk_flag=high
+Authorization: Bearer {{accessToken}}
+
+
+### 3.5 Create a visit (Field Agent — self-assigned)
+# Login as agent1 first and use that access token
+# @name createVisit
+POST {{baseUrl}}/visits/
+Content-Type: {{contentType}}
+Authorization: Bearer {{accessToken}}
+
+{
+  "location": "Sector 12, North Zone"
+}
+
+
+### 3.6 Create a visit linked to a task
+POST {{baseUrl}}/visits/
+Content-Type: {{contentType}}
+Authorization: Bearer {{accessToken}}
+
+{
+  "location": "Main Road Warehouse, Sector 5",
+  "task_id": "PASTE_TASK_UUID_HERE"
+}
+
+
+### 3.7 Get visit detail (includes AI output if generated)
+# Replace <visit-id> with UUID from createVisit response
+GET {{baseUrl}}/visits/<visit-id>/
+Authorization: Bearer {{accessToken}}
+
+
+### 3.8 Start a visit → scheduled to in_progress
+POST {{baseUrl}}/visits/<visit-id>/start/
+Authorization: Bearer {{accessToken}}
+
+
+### 3.9 Try to start an already in-progress visit → expect 400
+POST {{baseUrl}}/visits/<visit-id>/start/
+Authorization: Bearer {{accessToken}}
+
+
+### 3.10 Add notes to visit (triggers AI generation)
+# @name addNotes
+PATCH {{baseUrl}}/visits/<visit-id>/notes/
+Content-Type: {{contentType}}
+Authorization: Bearer {{accessToken}}
+
+{
+  "notes": "Customer was present. The unit was inspected and found in good condition. Minor cleaning required but no major issues reported.",
+  "outcome": "partial"
+}
+
+
+### 3.11 Add notes with HIGH RISK keywords → risk_flag should be high
+PATCH {{baseUrl}}/visits/<visit-id>/notes/
+Content-Type: {{contentType}}
+Authorization: Bearer {{accessToken}}
+
+{
+  "notes": "Customer refused entry and was hostile. Urgent escalation required. The facility appears to have been damaged and there is a safety hazard.",
+  "outcome": "failed"
+}
+
+
+### 3.12 Add notes with MEDIUM RISK keywords → risk_flag should be medium
+PATCH {{baseUrl}}/visits/<visit-id>/notes/
+Content-Type: {{contentType}}
+Authorization: Bearer {{accessToken}}
+
+{
+  "notes": "Visit was delayed due to traffic. Partial work completed but there is an issue with the main unit that needs a follow up next week.",
+  "outcome": "partial"
+}
+
+
+### 3.13 Get AI output for this visit (separate endpoint)
+GET {{baseUrl}}/visits/<visit-id>/ai-output/
+Authorization: Bearer {{accessToken}}
+
+
+### 3.14 Get AI output before notes added → expect 404
+GET {{baseUrl}}/visits/NEW_VISIT_UUID_WITHOUT_NOTES/ai-output/
+Authorization: Bearer {{accessToken}}
+
+
+### 3.15 Complete a visit with outcome
+POST {{baseUrl}}/visits/<visit-id>/complete/
+Content-Type: {{contentType}}
+Authorization: Bearer {{accessToken}}
+
+{
+  "outcome": "successful"
+}
+
+
+### 3.16 Complete visit with "pending" outcome → expect 400
+POST {{baseUrl}}/visits/<visit-id>/complete/
+Content-Type: {{contentType}}
+Authorization: Bearer {{accessToken}}
+
+{
+  "outcome": "pending"
+}
+
+
+### 3.17 Try to complete a scheduled visit (not started) → expect 400
+POST {{baseUrl}}/visits/SCHEDULED_VISIT_UUID/complete/
+Content-Type: {{contentType}}
+Authorization: Bearer {{accessToken}}
+
+{
+  "outcome": "successful"
+}
+
+
+### 3.18 Add notes to cancelled visit → expect 400
+PATCH {{baseUrl}}/visits/CANCELLED_VISIT_UUID/notes/
+Content-Type: {{contentType}}
+Authorization: Bearer {{accessToken}}
+
+{
+  "notes": "This should be rejected."
+}
+
+
+### 3.19 Try to start another agent's visit as FA → expect 403
+# Login as agent2, then try to start agent1's visit
+POST {{baseUrl}}/visits/<agent1-visit-id>/start/
+Authorization: Bearer AGENT2_ACCESS_TOKEN_HERE
+
+
+### 3.20 List visits as Field Agent → only own visits
+GET {{baseUrl}}/visits/
+Authorization: Bearer AGENT_ACCESS_TOKEN_HERE
+
+
+### 3.21 Filter visits by completed date range
+GET {{baseUrl}}/visits/?completed_after=2026-01-01&completed_before=2026-12-31
+Authorization: Bearer {{accessToken}}
+
+
+###############################################
+# PHASE 4 — REPORT ENDPOINTS
+# (will be added after Phase 4 is built)
+###############################################
+
+
+###############################################
+# PHASE 5 — LOG ENDPOINTS
+# (will be added after Phase 5 is built)
+###############################################
