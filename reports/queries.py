@@ -33,10 +33,10 @@ def get_pending_tasks_by_region(region_id=None, team_id=None):
 
     if region_id:
         where_clauses.append("t.region_id = %s")
-        params.append(str(region_id))
+        params.append(str(region_id).replace('-', ''))
     if team_id:
         where_clauses.append("t.team_id = %s")
-        params.append(str(team_id))
+        params.append(str(team_id).replace('-', ''))
 
     where_sql = " AND ".join(where_clauses)
 
@@ -75,10 +75,10 @@ def get_agent_performance(region_id=None, team_id=None):
 
     if region_id:
         where_clauses.append("u.region_id = %s")
-        params.append(str(region_id))
+        params.append(str(region_id).replace('-', ''))
     if team_id:
         where_clauses.append("u.team_id = %s")
-        params.append(str(team_id))
+        params.append(str(team_id).replace('-', ''))
 
     where_sql = " AND ".join(where_clauses)
 
@@ -124,10 +124,10 @@ def get_recent_visits(days=7, region_id=None, team_id=None):
 
     if region_id:
         where_clauses.append("u.region_id = %s")
-        params.append(str(region_id))
+        params.append(str(region_id).replace('-', ''))
     if team_id:
         where_clauses.append("u.team_id = %s")
-        params.append(str(team_id))
+        params.append(str(team_id).replace('-', ''))
 
     where_sql = " AND ".join(where_clauses)
 
@@ -173,10 +173,10 @@ def get_task_distribution(region_id=None, team_id=None):
 
     if region_id:
         where_clauses.append("t.region_id = %s")
-        params.append(str(region_id))
+        params.append(str(region_id).replace('-', ''))
     if team_id:
         where_clauses.append("t.team_id = %s")
-        params.append(str(team_id))
+        params.append(str(team_id).replace('-', ''))
 
     where_sql = " AND ".join(where_clauses)
 

@@ -15,7 +15,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ─────────────────────────────────────────────────────────────
 SECRET_KEY = 'django-insecure-fieldflow-dev-key-change-in-production-2024'
 DEBUG = True
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'testserver']
 
 # ─────────────────────────────────────────────────────────────
 # Application Definition

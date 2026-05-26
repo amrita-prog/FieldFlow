@@ -469,11 +469,144 @@ Authorization: Bearer {{accessToken}}
 
 ###############################################
 # PHASE 4 — REPORT ENDPOINTS
-# (will be added after Phase 4 is built)
 ###############################################
+
+
+### 4.1 Dashboard Summary (all roles, scoped)
+GET {{baseUrl}}/reports/dashboard-summary/
+Authorization: Bearer {{accessToken}}
+
+
+### 4.2 Dashboard Summary as Field Agent (own data only)
+GET {{baseUrl}}/reports/dashboard-summary/
+Authorization: Bearer AGENT_ACCESS_TOKEN_HERE
+
+
+### 4.3 Pending Tasks by Region/Team (Admin → all data)
+GET {{baseUrl}}/reports/pending-tasks/
+Authorization: Bearer {{accessToken}}
+
+
+### 4.4 Pending Tasks (Regional Manager → region-scoped)
+GET {{baseUrl}}/reports/pending-tasks/
+Authorization: Bearer RM_ACCESS_TOKEN_HERE
+
+
+### 4.5 Pending Tasks (Team Lead → team-scoped)
+GET {{baseUrl}}/reports/pending-tasks/
+Authorization: Bearer TL_ACCESS_TOKEN_HERE
+
+
+### 4.6 Pending Tasks as Field Agent → expect 403
+GET {{baseUrl}}/reports/pending-tasks/
+Authorization: Bearer AGENT_ACCESS_TOKEN_HERE
+
+
+### 4.7 Agent Performance Report
+GET {{baseUrl}}/reports/agent-performance/
+Authorization: Bearer {{accessToken}}
+
+
+### 4.8 Recent Visits (last 7 days, default)
+GET {{baseUrl}}/reports/recent-visits/
+Authorization: Bearer {{accessToken}}
+
+
+### 4.9 Recent Visits (custom period — last 30 days)
+GET {{baseUrl}}/reports/recent-visits/?days=30
+Authorization: Bearer {{accessToken}}
+
+
+### 4.10 Task Status Distribution by Manager
+GET {{baseUrl}}/reports/task-distribution/
+Authorization: Bearer {{accessToken}}
+
+
+### 4.11 Task Distribution as Auditor → full access
+GET {{baseUrl}}/reports/task-distribution/
+Authorization: Bearer AUDITOR_ACCESS_TOKEN_HERE
+
+
+### 4.12 Agent Performance as Auditor → full access
+GET {{baseUrl}}/reports/agent-performance/
+Authorization: Bearer AUDITOR_ACCESS_TOKEN_HERE
 
 
 ###############################################
 # PHASE 5 — LOG ENDPOINTS
-# (will be added after Phase 5 is built)
 ###############################################
+
+
+### 5.1 List all activity logs (Admin → all logs)
+GET {{baseUrl}}/logs/
+Authorization: Bearer {{accessToken}}
+
+
+### 5.2 Filter logs by action type
+GET {{baseUrl}}/logs/?action=task_created
+Authorization: Bearer {{accessToken}}
+
+
+### 5.3 Filter logs by multiple action types
+GET {{baseUrl}}/logs/?action=task_assigned
+Authorization: Bearer {{accessToken}}
+
+
+### 5.4 Filter logs by visit actions
+GET {{baseUrl}}/logs/?action=visit_started
+Authorization: Bearer {{accessToken}}
+
+
+### 5.5 Filter logs by AI action
+GET {{baseUrl}}/logs/?action=ai_output_generated
+Authorization: Bearer {{accessToken}}
+
+
+### 5.6 Filter logs by actor (paste a user UUID)
+GET {{baseUrl}}/logs/?actor_id=PASTE_USER_UUID_HERE
+Authorization: Bearer {{accessToken}}
+
+
+### 5.7 Filter logs by target type
+GET {{baseUrl}}/logs/?target_type=task
+Authorization: Bearer {{accessToken}}
+
+
+### 5.8 Filter logs by target type = visit
+GET {{baseUrl}}/logs/?target_type=visit
+Authorization: Bearer {{accessToken}}
+
+
+### 5.9 Filter logs by date range
+GET {{baseUrl}}/logs/?from=2026-01-01&to=2026-12-31
+Authorization: Bearer {{accessToken}}
+
+
+### 5.10 Logs paginated (page 2)
+GET {{baseUrl}}/logs/?page=2
+Authorization: Bearer {{accessToken}}
+
+
+### 5.11 Logs as Regional Manager → region-scoped
+GET {{baseUrl}}/logs/
+Authorization: Bearer RM_ACCESS_TOKEN_HERE
+
+
+### 5.12 Logs as Team Lead → team-scoped
+GET {{baseUrl}}/logs/
+Authorization: Bearer TL_ACCESS_TOKEN_HERE
+
+
+### 5.13 Logs as Auditor → full access read-only
+GET {{baseUrl}}/logs/
+Authorization: Bearer AUDITOR_ACCESS_TOKEN_HERE
+
+
+### 5.14 Logs as Field Agent → expect 403
+GET {{baseUrl}}/logs/
+Authorization: Bearer AGENT_ACCESS_TOKEN_HERE
+
+
+### 5.15 Get a single log entry
+GET {{baseUrl}}/logs/<log-id>/
+Authorization: Bearer {{accessToken}}
