@@ -127,7 +127,12 @@ class VisitViewSet(ScopedQuerysetMixin, viewsets.ModelViewSet):
         Marks visit as in_progress. Only the assigned agent can do this.
         Visit must be in 'scheduled' state.
         """
-        visit = self.get_object()
+        # Use unscoped lookup so supervisors/admins get 403 (not 404)
+        # for visits outside their team, and agents get 403 for others' visits
+        visit = _get_visit_or_404(pk)
+        if visit is None:
+            from rest_framework.exceptions import NotFound
+            raise NotFound()
 
         # Only the assigned agent or Admin can start a visit
         if not _can_modify_visit(request.user, visit):
@@ -173,7 +178,10 @@ class VisitViewSet(ScopedQuerysetMixin, viewsets.ModelViewSet):
         Body: { "outcome": "successful" | "failed" | "partial" }
         Marks visit as completed. Must be in_progress first.
         """
-        visit = self.get_object()
+        visit = _get_visit_or_404(pk)
+        if visit is None:
+            from rest_framework.exceptions import NotFound
+            raise NotFound()
 
         if not _can_modify_visit(request.user, visit):
             return Response(
@@ -224,7 +232,10 @@ class VisitViewSet(ScopedQuerysetMixin, viewsets.ModelViewSet):
         Updates visit notes and triggers MockAIService.
         AI output is saved to AIOutput and returned in the response.
         """
-        visit = self.get_object()
+        visit = _get_visit_or_404(pk)
+        if visit is None:
+            from rest_framework.exceptions import NotFound
+            raise NotFound()
 
         if not _can_modify_visit(request.user, visit):
             return Response(
@@ -277,7 +288,10 @@ class VisitViewSet(ScopedQuerysetMixin, viewsets.ModelViewSet):
         GET /api/visits/{id}/ai-output/
         Returns the stored AI output for this visit, or 404 if none yet.
         """
-        visit = self.get_object()
+        visit = _get_visit_or_404(pk)
+        if visit is None:
+            from rest_framework.exceptions import NotFound
+            raise NotFound()
         try:
             output = visit.ai_output
         except AIOutput.DoesNotExist:
@@ -337,3 +351,20 @@ def _log(actor, action, visit, metadata=None):
         log_activity(actor, action, visit, metadata)
     except Exception:
         pass
+
+
+def _get_visit_or_404(pk):
+    """
+    Fetch a visit by PK without scope filtering.
+    Used in custom actions so we can return proper 403 instead of 404
+    when a field agent tries to access another agent's visit.
+    Returns None if the visit does not exist (caller raises NotFound).
+    """
+    try:
+        return Visit.objects.select_related(
+            'task', 'agent', 'agent__role',
+            'agent__team', 'agent__region',
+            'ai_output',
+        ).get(pk=pk)
+    except Visit.DoesNotExist:
+        return None
