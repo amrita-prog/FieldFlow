@@ -19,10 +19,9 @@ SECRET_KEY = os.environ.get(
     'django-insecure-fieldflow-dev-key-change-in-production-2024'
 )
 
-DEBUG = os.environ.get('DEBUG', 'True') == 'True'
+DEBUG = True
 
-_raw_hosts = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,testserver')
-ALLOWED_HOSTS = [h.strip() for h in _raw_hosts.split(',') if h.strip()]
+ALLOWED_HOSTS = ['*']  # Demo mode — open to all hosts
 
 # ─────────────────────────────────────────────────────────────
 # Application Definition
@@ -162,9 +161,5 @@ SIMPLE_JWT = {
 # ─────────────────────────────────────────────────────────────
 # CORS
 # ─────────────────────────────────────────────────────────────
-_raw_cors = os.environ.get(
-    'CORS_ALLOWED_ORIGINS',
-    'http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173'
-)
-CORS_ALLOWED_ORIGINS = [o.strip() for o in _raw_cors.split(',') if o.strip()]
+CORS_ALLOW_ALL_ORIGINS = True      # Demo mode — allow any frontend origin
 CORS_ALLOW_CREDENTIALS = True
