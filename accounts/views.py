@@ -21,7 +21,7 @@ from accounts.serializers import (
     UserUpdateSerializer,
     UserBriefSerializer,
 )
-from accounts.permissions import IsAdminRole
+from accounts.permissions import IsAdminRole, HasModulePermission, _get_module_permission
 
 
 # ─────────────────────────────────────────────────────────────
@@ -132,12 +132,12 @@ class MeView(APIView):
 class UserViewSet(viewsets.ModelViewSet):
     """
     /api/users/
-    Admin-only CRUD for user management.
+    Role-based CRUD for user management.
     Destroy is overridden to soft-delete (set is_active=False).
     """
     module = 'users'
     queryset = User.objects.select_related('role', 'region', 'team').all()
-    permission_classes = [IsAuthenticated, IsAdminRole]
+    permission_classes = [IsAuthenticated, HasModulePermission]
 
     def get_serializer_class(self):
         if self.action == 'create':
@@ -150,6 +150,21 @@ class UserViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         qs = super().get_queryset()
+        user = self.request.user
+        
+        # Scope enforcement based on ModulePermission
+        perm = _get_module_permission(user, self.module)
+        if perm:
+            if perm.scope == ModulePermission.SCOPE_REGION:
+                qs = qs.filter(region=user.region)
+            elif perm.scope == ModulePermission.SCOPE_TEAM:
+                qs = qs.filter(team=user.team)
+            elif perm.scope == ModulePermission.SCOPE_OWN:
+                qs = qs.filter(id=user.id)
+            # if 'all', no additional filter applied
+        else:
+            qs = qs.none()
+
         # Optional filters via query params
         role_name = self.request.query_params.get('role')
         if role_name:
