@@ -2,6 +2,7 @@
 Django settings for FieldFlow Field Force Management System.
 """
 
+import os
 from pathlib import Path
 from datetime import timedelta
 
@@ -11,11 +12,17 @@ from datetime import timedelta
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # ─────────────────────────────────────────────────────────────
-# Security
+# Security  (values injected via Render Environment Variables)
 # ─────────────────────────────────────────────────────────────
-SECRET_KEY = 'django-insecure-fieldflow-dev-key-change-in-production-2024'
-DEBUG = True
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'testserver']
+SECRET_KEY = os.environ.get(
+    'SECRET_KEY',
+    'django-insecure-fieldflow-dev-key-change-in-production-2024'
+)
+
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
+
+_raw_hosts = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,testserver')
+ALLOWED_HOSTS = [h.strip() for h in _raw_hosts.split(',') if h.strip()]
 
 # ─────────────────────────────────────────────────────────────
 # Application Definition
@@ -47,6 +54,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',          # Must be first
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',     # Serve static files on Render
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -108,9 +116,12 @@ USE_I18N = True
 USE_TZ = True
 
 # ─────────────────────────────────────────────────────────────
-# Static Files
+# Static Files  (WhiteNoise serves them on Render)
 # ─────────────────────────────────────────────────────────────
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # ─────────────────────────────────────────────────────────────
@@ -151,10 +162,9 @@ SIMPLE_JWT = {
 # ─────────────────────────────────────────────────────────────
 # CORS
 # ─────────────────────────────────────────────────────────────
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:3000',
-    'http://127.0.0.1:3000',
-    'http://localhost:5173',  # Vite default
-    'http://127.0.0.1:5173',
-]
+_raw_cors = os.environ.get(
+    'CORS_ALLOWED_ORIGINS',
+    'http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173'
+)
+CORS_ALLOWED_ORIGINS = [o.strip() for o in _raw_cors.split(',') if o.strip()]
 CORS_ALLOW_CREDENTIALS = True

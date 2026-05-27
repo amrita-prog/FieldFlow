@@ -8,8 +8,8 @@
 # ─────────────────────────────────────────────
 # Store tokens after login (copy from response)
 # ─────────────────────────────────────────────
-@accessToken = PASTE_ACCESS_TOKEN_HERE
-@refreshToken = PASTE_REFRESH_TOKEN_HERE
+@accessToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc5ODY4NjQ5LCJpYXQiOjE3Nzk4NjY4NDksImp0aSI6ImZkOGMzMTIwYTU5MDQ0ZDNiODk2NWE5NDc4MTljY2Q3IiwidXNlcl9pZCI6ImY4YTY4NmYzLTQyYWMtNGYwMi04NTMwLWIyM2M5NTc0YjRjNSJ9.mr-x1AKKJGEgAgUEG8bLN5sccbhcyciCbcruTyK_mIg
+@refreshToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTc4MDQ3MTY0OSwiaWF0IjoxNzc5ODY2ODQ5LCJqdGkiOiIwZDgwNDg4Y2E1MTk0OWFhOTExYjQ2ZjA3YjI1MzY3ZiIsInVzZXJfaWQiOiJmOGE2ODZmMy00MmFjLTRmMDItODUzMC1iMjNjOTU3NGI0YzUifQ.KyZiI4tnmIEu4KdJeK2N7sE0XHaoN_lwpJTVD4hqEk4
 
 
 ###############################################
@@ -113,7 +113,7 @@ Authorization: Bearer {{accessToken}}
 
 ### 1.12 Get single user detail
 # Replace <user-id> with an actual UUID from seed output
-GET {{baseUrl}}/users/<user-id>/
+GET {{baseUrl}}/users/49407ea5-894a-4cc8-a639-8355513daf96/
 Authorization: Bearer {{accessToken}}
 
 
@@ -123,19 +123,19 @@ Content-Type: {{contentType}}
 Authorization: Bearer {{accessToken}}
 
 {
-  "username": "newagent",
-  "email": "newagent@fieldflow.com",
+  "username": "new_amrita",
+  "email": "newamrita@fieldflow.com",
   "password": "Pass@123",
   "first_name": "New",
   "last_name": "Agent",
-  "role_id": 4,
+  "role_id": 5,
   "region_id": null,
   "team_id": null
 }
 
 
 ### 1.14 Update user (Admin only)
-PATCH {{baseUrl}}/users/<user-id>/
+PATCH {{baseUrl}}/users/49407ea5-894a-4cc8-a639-8355513daf96/
 Content-Type: {{contentType}}
 Authorization: Bearer {{accessToken}}
 
@@ -205,13 +205,13 @@ Authorization: Bearer {{accessToken}}
   "description": "Visit the customer site and verify previous work.",
   "priority": "medium",
   "due_date": "2026-06-20",
-  "assigned_to_id": "PASTE_FIELD_AGENT_UUID_HERE"
+  "assigned_to_id": "f8a686f3-42ac-4f02-8530-b23c9574b4c5"
 }
 
 
 ### 2.8 Get task detail
 # Replace <task-id> with UUID from createTask response
-GET {{baseUrl}}/tasks/<task-id>/
+GET {{baseUrl}}/tasks/2a48155a-f635-41e0-bee6-fd9508b04493/
 Authorization: Bearer {{accessToken}}
 
 
@@ -226,7 +226,7 @@ Authorization: Bearer {{accessToken}}
 
 
 ### 2.10 Update task status → in_progress
-PATCH {{baseUrl}}/tasks/<task-id>/status/
+PATCH {{baseUrl}}/tasks/2a48155a-f635-41e0-bee6-fd9508b04493/status/
 Content-Type: {{contentType}}
 Authorization: Bearer {{accessToken}}
 
@@ -236,7 +236,7 @@ Authorization: Bearer {{accessToken}}
 
 
 ### 2.11 Update task status → completed
-PATCH {{baseUrl}}/tasks/<task-id>/status/
+PATCH {{baseUrl}}/tasks/2a48155a-f635-41e0-bee6-fd9508b04493/status/
 Content-Type: {{contentType}}
 Authorization: Bearer {{accessToken}}
 
@@ -256,7 +256,7 @@ Authorization: Bearer {{accessToken}}
 
 
 ### 2.13 Partially update a task (title/description)
-PATCH {{baseUrl}}/tasks/<task-id>/
+PATCH {{baseUrl}}/tasks/2a48155a-f635-41e0-bee6-fd9508b04493/
 Content-Type: {{contentType}}
 Authorization: Bearer {{accessToken}}
 
@@ -278,7 +278,7 @@ Authorization: Bearer {{accessToken}}
 ### 2.15 List tasks as Field Agent → should only see own tasks
 # Login as agent1 first, copy that access token here
 GET {{baseUrl}}/tasks/
-Authorization: Bearer AGENT_ACCESS_TOKEN_HERE
+Authorization: Bearer {{accessToken}} 
 
 
 ### 2.16 Delete task — cancel it (Admin only)
@@ -299,7 +299,7 @@ Authorization: Bearer {{accessToken}}
 
 
 ### 2.18 List tasks paginated (page 2)
-GET {{baseUrl}}/tasks/?page=2
+GET {{baseUrl}}/tasks/?page=1
 Authorization: Bearer {{accessToken}}
 
 
@@ -347,7 +347,7 @@ Authorization: Bearer {{accessToken}}
 
 {
   "location": "Main Road Warehouse, Sector 5",
-  "task_id": "PASTE_TASK_UUID_HERE"
+  "task_id": "2a48155a-f635-41e0-bee6-fd9508b04493"
 }
 
 
@@ -358,18 +358,18 @@ Authorization: Bearer {{accessToken}}
 
 
 ### 3.8 Start a visit → scheduled to in_progress
-POST {{baseUrl}}/visits/<visit-id>/start/
+POST {{baseUrl}}/visits/657ee852-fb6b-4269-a462-2cf76856f083/start/
 Authorization: Bearer {{accessToken}}
 
 
 ### 3.9 Try to start an already in-progress visit → expect 400
-POST {{baseUrl}}/visits/<visit-id>/start/
+POST {{baseUrl}}/visits/657ee852-fb6b-4269-a462-2cf76856f083/start/
 Authorization: Bearer {{accessToken}}
 
 
 ### 3.10 Add notes to visit (triggers AI generation)
 # @name addNotes
-PATCH {{baseUrl}}/visits/<visit-id>/notes/
+PATCH {{baseUrl}}/visits/657ee852-fb6b-4269-a462-2cf76856f083/notes/
 Content-Type: {{contentType}}
 Authorization: Bearer {{accessToken}}
 
@@ -380,7 +380,7 @@ Authorization: Bearer {{accessToken}}
 
 
 ### 3.11 Add notes with HIGH RISK keywords → risk_flag should be high
-PATCH {{baseUrl}}/visits/<visit-id>/notes/
+PATCH {{baseUrl}}/visits/657ee852-fb6b-4269-a462-2cf76856f083/notes/
 Content-Type: {{contentType}}
 Authorization: Bearer {{accessToken}}
 
@@ -402,7 +402,7 @@ Authorization: Bearer {{accessToken}}
 
 
 ### 3.13 Get AI output for this visit (separate endpoint)
-GET {{baseUrl}}/visits/<visit-id>/ai-output/
+GET {{baseUrl}}/visits/657ee852-fb6b-4269-a462-2cf76856f083/ai-output/
 Authorization: Bearer {{accessToken}}
 
 
@@ -479,7 +479,7 @@ Authorization: Bearer {{accessToken}}
 
 ### 4.2 Dashboard Summary as Field Agent (own data only)
 GET {{baseUrl}}/reports/dashboard-summary/
-Authorization: Bearer AGENT_ACCESS_TOKEN_HERE
+Authorization: Bearer {{accessToken}}
 
 
 ### 4.3 Pending Tasks by Region/Team (Admin → all data)
