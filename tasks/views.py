@@ -152,7 +152,13 @@ class TaskViewSet(ScopedQuerysetMixin, viewsets.ModelViewSet):
         previous_assignee = task.assigned_to
 
         task.assigned_to = agent
-        task.save(update_fields=['assigned_to', 'updated_at'])
+        
+        if agent.region:
+            task.region = agent.region
+        if agent.team:
+            task.team = agent.team
+
+        task.save(update_fields=['assigned_to', 'region', 'team', 'updated_at'])
 
         _log(request.user, 'task_assigned', task, {
             'assigned_to': agent.email,

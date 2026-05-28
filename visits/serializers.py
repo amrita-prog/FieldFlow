@@ -105,7 +105,7 @@ class VisitCreateSerializer(serializers.ModelSerializer):
 
         # If no agent specified and the requester is a Field Agent,
         # default the agent to the requester themselves
-        if 'agent' not in validated_data:
+        if not validated_data.get('agent'):
             if user.role and user.role.name == 'Field Agent':
                 validated_data['agent'] = user
             else:

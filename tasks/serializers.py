@@ -103,11 +103,20 @@ class TaskCreateSerializer(serializers.ModelSerializer):
         # Auto-set created_by
         validated_data['created_by'] = user
 
-        # Auto-fill region/team from user if not explicitly provided
-        if 'region' not in validated_data and user.region:
-            validated_data['region'] = user.region
-        if 'team' not in validated_data and user.team:
-            validated_data['team'] = user.team
+        assigned_to = validated_data.get('assigned_to')
+
+        # Auto-fill region/team from assigned_to agent if provided
+        if assigned_to:
+            if not validated_data.get('region') and assigned_to.region:
+                validated_data['region'] = assigned_to.region
+            if not validated_data.get('team') and assigned_to.team:
+                validated_data['team'] = assigned_to.team
+        else:
+            # Fallback to creator's region/team
+            if not validated_data.get('region') and user.region:
+                validated_data['region'] = user.region
+            if not validated_data.get('team') and user.team:
+                validated_data['team'] = user.team
 
         return Task.objects.create(**validated_data)
 
